@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: s3proxy
+  labels:
+    app: s3proxy
+spec:
+  selector:
+    matchLabels:
+      app: s3proxy
+  template:
+    metadata:
+      annotations:
+        data.statcan.gc.ca/inject-blob-volumes: "true"
+      labels:
+        app: s3proxy
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+        - name: nginx
+          image: nginx-test-dev:latest
+          imagePullPolicy: IfNotPresent
+          resources:
+            limits:
+              cpu: "0.25"
+              memory: "250Mi"
+            requests:
+              cpu: "0.25"
+              memory: "250Mi"
+          volumeMounts:
+            - name: nginx-config
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+            - name: static-files
+              mountPath: /etc/nginx/html/s3/
+          ports:
+            - name: http
+              containerPort: 8080
+      volumes:
+        - name: nginx-config
+          configMap:
+            name: s3proxy-nginx-conf
+        - name: static-files
+          emptyDir: {}

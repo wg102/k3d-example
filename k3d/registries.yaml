@@ -1,0 +1,4 @@
+mirrors:
+  "localhost:5050":
+    endpoint:
+      - http://nginx-test-registry:5050
